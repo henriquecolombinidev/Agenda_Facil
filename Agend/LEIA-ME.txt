@@ -1,0 +1,11 @@
+AGEND - agendamento inteligente 
+
+LOGINS:
+  Admin:   admin / admin
+  Cliente:    henrique@gmail.com / teste
+
+
+FUNCIONALIDADES:
+  Cliente agenda serviços | Profissional cria/gerencia
+  Admin vê painel com modais "Ampliar" | Agenda pública
+

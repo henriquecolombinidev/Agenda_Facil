@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Agend — agendamento inteligente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--primary:#F59E0B;--primary-dark:#D97706;--primary-light:#1C1400;--accent:#FBBF24;--accent-light:#1E1800;--bg:#0A0A0A;--surface:#141414;--surface-alt:#1E1E1E;--text:#F5F5F5;--text-secondary:#9CA3AF;--border:#2A241A;--success:#10B981;--warning:#F59E0B;--error:#EF4444;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);--shadow-lg:0 10px 30px rgba(0,0,0,.5);--glow:0 0 20px rgba(245,158,11,.15)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--text);line-height:1.6}a{color:inherit;text-decoration:none}
+
+.header{background:rgba(10,10,10,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;color:var(--text);display:flex;align-items:center;gap:.4rem;cursor:pointer}.logoIcon{color:var(--accent);font-size:1.1rem}
+.nav{display:flex;align-items:center;gap:.25rem}
+.navLink{padding:.5rem 1rem;border-radius:8px;font-size:.9rem;font-weight:500;color:var(--text-secondary);transition:all .2s;cursor:pointer;background:none;border:none;font-family:inherit}
+.navLink:hover{background:var(--primary-light);color:var(--accent)}
+.profile{display:flex;align-items:center;gap:.5rem;padding:.4rem .8rem;margin-left:.5rem}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#0A0A0A;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.85rem}
+.nome{font-size:.9rem;font-weight:500;color:var(--text)}
+.sair{background:none;border:1px solid var(--border);color:var(--text-secondary);padding:.4rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:500;transition:all .2s;font-family:inherit}
+.sair:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.ctaBtn{background:var(--primary);color:#0A0A0A;padding:.5rem 1.25rem;border-radius:8px;font-weight:600;font-size:.9rem;transition:all .2s;cursor:pointer;border:none;font-family:inherit}
+.ctaBtn:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:var(--glow)}
+.adminLink{font-size:1.1rem;padding:.4rem .6rem;border-radius:8px;color:var(--text-secondary);opacity:.5;transition:all .2s;margin-left:.25rem;cursor:pointer;background:none;border:none;font-family:inherit}
+.adminLink:hover{opacity:1;color:var(--accent);background:var(--primary-light)}
+
+.page{min-height:calc(100vh - 64px)}
+.page-center{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem}
+
+.hero{max-width:1200px;margin:0 auto;padding:4rem 1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative}
+.hero::before{content:'';position:absolute;top:-20%;left:-10%;width:60%;height:80%;background:radial-gradient(ellipse at center,rgba(245,158,11,.08) 0%,transparent 70%);pointer-events:none}
+.heroContent{display:flex;flex-direction:column;gap:1.5rem}
+.badge{display:inline-flex;align-items:center;background:var(--primary-light);color:var(--primary);font-size:.8rem;font-weight:600;padding:.35rem 1rem;border-radius:100px;width:fit-content}
+.hero h1{font-size:3.5rem;line-height:1.1;font-weight:800;letter-spacing:-.03em}
+.highlight{color:var(--primary)}
+.hero p{font-size:1.15rem;color:var(--text-secondary);max-width:450px;line-height:1.7}
+.actions{display:flex;gap:.75rem;margin-top:.5rem}
+.btnPrimary,.btnSecondary{padding:.75rem 1.75rem;border-radius:var(--radius);font-weight:600;font-size:.95rem;transition:all .2s;cursor:pointer;border:none;font-family:inherit;display:inline-block;text-align:center}
+.btnPrimary{background:var(--primary);color:#0A0A0A;box-shadow:0 4px 14px rgba(245,158,11,.3)}
+.btnPrimary:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,158,11,.4)}
+.btnSecondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btnSecondary:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+.heroVisual{display:flex;justify-content:center}
+.cardDemo{background:var(--surface);border-radius:16px;box-shadow:var(--shadow-lg);width:100%;max-width:380px;overflow:hidden;border:1px solid var(--border)}
+.demoHeader{display:flex;gap:6px;padding:1rem 1.25rem;background:var(--bg);border-bottom:1px solid var(--border)}
+.demoDot{width:10px;height:10px;border-radius:50%}
+.demoBody{padding:1rem 1.25rem;display:flex;flex-direction:column;gap:1rem}
+.demoItem{display:flex;gap:1rem;align-items:center;padding:.75rem;background:var(--bg);border-radius:10px}
+.demoTime{font-weight:700;font-size:.9rem;color:var(--primary);min-width:48px}
+.demoInfo{display:flex;flex-direction:column;gap:2px}
+.demoInfo strong{font-size:.9rem}.demoInfo span{font-size:.8rem;color:var(--text-secondary)}
+
+.features{max-width:1200px;margin:0 auto;padding:2rem 1.5rem 5rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.card{background:var(--surface);padding:2rem;border-radius:var(--radius);border:1px solid var(--border);transition:all .3s}
+.card:hover{box-shadow:var(--shadow-lg),var(--glow);transform:translateY(-3px);border-color:rgba(245,158,11,.3)}
+.cardIcon{font-size:1.8rem;color:var(--primary);margin-bottom:1rem;display:block}.card h3{font-size:1.1rem;margin-bottom:.5rem}
+.card p{color:var(--text-secondary);font-size:.9rem;line-height:1.6}
+.cta{background:linear-gradient(135deg,#D97706 0%,#F59E0B 50%,#FBBF24 100%);padding:4rem 1.5rem}
+.ctaInner{max-width:600px;margin:0 auto;text-align:center;color:#0A0A0A;display:flex;flex-direction:column;gap:1rem;align-items:center}
+.cta h2{font-size:2.2rem;font-weight:800;color:#0A0A0A}.cta p{opacity:.85;font-size:1.05rem;color:rgba(10,10,10,.8)}
+.cta .btnPrimary{background:#0A0A0A;color:#F59E0B;box-shadow:none}
+.cta .btnPrimary:hover{background:#1A1A1A;transform:translateY(-2px)}
+.footer{text-align:center;padding:2rem;color:var(--text-secondary);font-size:.85rem}
+
+.authCard{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-lg);width:100%;max-width:420px;padding:2.5rem;border:1px solid var(--border);position:relative}
+.authCard::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(245,158,11,.08),transparent 50%);pointer-events:none}
+.authHeader{text-align:center;margin-bottom:2rem}
+.authIcon{font-size:2rem;color:var(--primary)}
+.authHeader h2{font-size:1.5rem;margin:.75rem 0 .35rem}
+.authHeader p{color:var(--text-secondary);font-size:.9rem}
+.form{display:flex;flex-direction:column;gap:1rem}
+.field{display:flex;flex-direction:column;gap:.35rem}
+.field label{font-size:.85rem;font-weight:500;color:var(--text)}
+.field input,.field select,.field textarea{padding:.75rem 1rem;border:1px solid var(--border);border-radius:10px;font-size:.95rem;font-family:inherit;transition:all .2s;background:var(--bg);color:var(--text)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(245,158,11,.15);background:var(--surface)}
+.btn{width:100%;padding:.8rem;background:var(--primary);color:#0A0A0A;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:.5rem;font-family:inherit}
+.btn:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 4px 14px rgba(245,158,11,.3)}
+.erro{background:var(--accent-light);color:var(--accent);padding:.75rem 1rem;border-radius:8px;font-size:.85rem;font-weight:500;text-align:center}
+.sucesso{background:#F0FDF4;color:var(--success);padding:.75rem 1rem;border-radius:8px;font-size:.85rem;font-weight:500;text-align:center}
+.toggle{text-align:center;margin-top:1.5rem;font-size:.9rem;color:var(--text-secondary)}
+.toggle button{background:none;border:none;color:var(--primary);font-weight:600;cursor:pointer;font-size:.9rem;font-family:inherit}
+.toggle button:hover{text-decoration:underline}
+
+.agendaPage{max-width:800px;margin:0 auto;padding:2rem 1.5rem}
+.agendaTop{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.agendaTop h1{font-size:1.75rem;font-weight:700}
+.filtros{display:flex;gap:.75rem;align-items:flex-end}
+.filterGroup{display:flex;flex-direction:column;gap:.35rem}
+.filterGroup label{font-size:.8rem;font-weight:500;color:var(--text-secondary)}
+.filterGroup input,.filterGroup select{padding:.55rem .85rem;border:1px solid var(--border);border-radius:8px;font-size:.9rem;font-family:inherit;background:var(--surface);color:var(--text);cursor:pointer}
+.filterGroup input:focus,.filterGroup select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+.lista{display:flex;flex-direction:column;gap:.75rem}
+.agCard{display:flex;gap:1rem;padding:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transition:all .3s}
+.agCard:hover{box-shadow:var(--glow);border-color:rgba(245,158,11,.2)}
+.agCard:hover{box-shadow:var(--shadow-lg)}
+.time{font-weight:700;font-size:1rem;color:var(--primary);background:var(--primary-light);padding:.4rem .7rem;border-radius:8px;line-height:1;height:fit-content;white-space:nowrap}
+.cardBody{flex:1;display:flex;flex-direction:column;gap:.5rem;min-width:0}
+.cardTop{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap}
+.cardTop h3{font-size:1.05rem;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.statusTag{font-size:.75rem;font-weight:600;padding:.2rem .7rem;border-radius:100px;white-space:nowrap}
+.cardInfo{display:flex;flex-wrap:wrap;gap:.25rem 1.25rem;font-size:.88rem;color:var(--text-secondary)}
+.preco{font-weight:600;color:var(--text)}
+.obs{font-size:.85rem;color:var(--text-secondary);font-style:italic;background:var(--bg);padding:.5rem .75rem;border-radius:6px}
+.cardActions{display:flex;gap:.5rem;margin-top:.25rem}
+.btnCancelar,.btnReativar{padding:.35rem .9rem;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.8rem;transition:all .2s;font-family:inherit}
+.btnCancelar{background:#2A2A00;color:var(--accent)}.btnCancelar:hover{background:var(--accent);color:#0A0A0A}
+.btnReativar{background:#F0FDF4;color:var(--success)}.btnReativar:hover{background:var(--success);color:#fff}
+.vazio{text-align:center;padding:4rem 1rem;color:var(--text-secondary)}
+.vazioIcon{font-size:2.5rem;color:var(--border);display:block;margin-bottom:.75rem}.vazio p{font-size:1rem}
+
+.novoPage{min-height:calc(100vh - 64px);display:flex;justify-content:center;padding:2rem 1.5rem}
+.novoCard{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-lg);width:100%;max-width:600px;padding:2.5rem;border:1px solid var(--border);align-self:flex-start;position:relative}
+.novoCard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:var(--radius) var(--radius) 0 0}
+.novoHeader{text-align:center;margin-bottom:2rem}
+.novoIcon{font-size:2rem;color:var(--primary)}
+.novoHeader h1{font-size:1.5rem;margin:.75rem 0 .35rem}
+.novoHeader p{color:var(--text-secondary);font-size:.9rem}
+.fields{display:flex;flex-direction:column;gap:1rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.opcional{color:var(--text-secondary);font-weight:400}
+.field textarea{resize:vertical;min-height:80px}
+
+.meusPage{max-width:700px;margin:0 auto;padding:2rem 1.5rem}
+.meusPage h1{font-size:1.75rem;font-weight:700;margin-bottom:2rem}
+.meusCard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;transition:all .3s}
+.meusCard:hover{box-shadow:var(--glow);border-color:rgba(245,158,11,.2)}
+.meusCard:hover{box-shadow:var(--shadow-lg)}
+.meusCardHeader{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;gap:1rem}
+.servicoInfo{display:flex;align-items:center;gap:.75rem}
+.servicoInfo h3{font-size:1.05rem;font-weight:600}
+.tag{font-size:.75rem;font-weight:600;padding:.2rem .7rem;border-radius:100px}
+.dataHora{text-align:right;display:flex;flex-direction:column;gap:2px}
+.data{font-size:.85rem;color:var(--text-secondary)}
+.hora{font-weight:700;color:var(--primary);font-size:1.1rem}
+.meusCardBody{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.infoRow{display:flex;flex-direction:column;gap:2px}
+.infoRow span{font-size:.8rem;color:var(--text-secondary)}
+.infoRow strong{font-size:.95rem}
+
+.adminLoginPage{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:2rem 1.5rem;background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%)}
+
+.adminPage{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+.adminLoading{text-align:center;color:var(--text-secondary);padding:4rem}
+.adminTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+.adminTop h1{font-size:1.75rem;font-weight:700}
+.adminCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2.5rem}
+.adminCard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;border-top:3px solid;display:flex;flex-direction:column;gap:.25rem;transition:all .3s}
+.adminCard:hover{box-shadow:var(--glow);border-color:rgba(245,158,11,.2)}
+.adminCardValue{font-size:2rem;font-weight:800;color:var(--text)}
+.adminCardLabel{font-size:.85rem;color:var(--text-secondary)}
+.adminCardLink{font-size:.8rem;color:var(--primary);font-weight:500;margin-top:.5rem;cursor:pointer;background:none;border:none;font-family:inherit;text-align:left;padding:0}
+.sectionTitle{font-size:1.2rem;font-weight:600;margin-bottom:1rem}
+.tabela{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.tabelaHeader{display:grid;grid-template-columns:1.5fr 1.2fr 1.2fr 1fr 0.6fr 1fr;gap:.5rem;padding:.85rem 1rem;background:var(--bg);font-size:.8rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.03em}
+.tabelaRow{display:grid;grid-template-columns:1.5fr 1.2fr 1.2fr 1fr 0.6fr 1fr;gap:.5rem;padding:.75rem 1rem;border-top:1px solid var(--border);font-size:.9rem;align-items:center}
+.tabelaRow:hover{background:var(--surface-alt)}
+.statusTag{font-size:.75rem;font-weight:600;padding:.2rem .6rem;border-radius:100px;width:fit-content}
+.btnAcao{padding:.3rem .7rem;border:none;border-radius:6px;font-weight:600;font-size:.75rem;cursor:pointer;transition:all .2s;font-family:inherit}
+.btnAcao:hover{filter:brightness(.9)}
+.st-agendado{background:#1C1400;color:#FBBF24}.st-confirmado{background:#0F0A2A;color:#A78BFA}.st-cancelado{background:#1A1A1A;color:#9CA3AF}.st-concluido{background:#0A1A0A;color:#34D399}
+.adminHeaderBtns{display:flex;gap:.5rem;align-items:center}
+.adminSections{display:flex;flex-direction:column;gap:1.5rem}
+.adminSection{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .3s}
+.adminSection:hover{box-shadow:var(--glow)}
+.adminSection{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .2s}
+.adminSection:hover{box-shadow:var(--shadow-lg)}
+.adminSectionHeader{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--bg)}
+.adminSectionHeader h2{font-size:1.05rem;font-weight:600}
+.btnExpandir{background:var(--primary);color:#0A0A0A;border:none;padding:.4rem 1rem;border-radius:8px;font-weight:600;font-size:.8rem;cursor:pointer;transition:all .2s;font-family:inherit}
+.btnExpandir:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.adminSectionBody{padding:1rem 1.25rem}
+.modal-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1.5rem;animation:fadeIn .2s}
+
+.modal-box{background:var(--surface);border-radius:var(--radius);width:100%;max-width:800px;max-height:85vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,.5);animation:scaleIn .2s;border:1px solid var(--border)}
+
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface-alt);z-index:1}
+
+.modal-header h2{font-size:1.2rem;font-weight:700}
+
+.modal-close{background:var(--surface-alt);border:none;width:36px;height:36px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:all .2s;font-family:inherit}
+
+.modal-close:hover{background:var(--primary-light);color:var(--accent)}
+.modal-body{padding:1.5rem}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+.page-section{display:none}
+.page-section.active{display:block}
+
+@media(max-width:768px){
+  .hero{grid-template-columns:1fr;gap:2rem;padding:2rem 1.5rem}.hero h1{font-size:2.5rem}.heroVisual{display:none}.features{grid-template-columns:1fr}
+  .tabelaHeader,.tabelaRow{grid-template-columns:1fr 1fr;font-size:.8rem}
+  .tabelaHeader span:nth-child(n+3),.tabelaRow span:nth-child(n+3){display:none}
+}
+@media(max-width:600px){
+  .nav{gap:0}.navLink{padding:.4rem .5rem;font-size:.8rem}.profile{display:none}
+  .agendaTop{flex-direction:column;align-items:stretch}.agCard{flex-direction:column;gap:.75rem}.time{width:fit-content}
+  .row{grid-template-columns:1fr}
+  .meusCardBody{grid-template-columns:1fr}.meusCardHeader{flex-direction:column}.dataHora{text-align:left;flex-direction:row;gap:.5rem}
+}
+</style>
+</head>
+<body>
+
+<header class="header" id="app-header">
+  <div class="inner">
+    <a class="logo" onclick="ir('home')">
+      <span class="logoIcon">✦</span> Agend
+    </a>
+    <nav class="nav">
+      <span id="auth-nav" style="display:inline-flex;align-items:center;gap:.35rem"></span>
+      <button class="adminLink" onclick="ir('admin-login')" title="Admin">◈</button>
+    </nav>
+  </div>
+</header>
+
+<main id="page-home" class="page-section active"></main>
+<main id="page-login" class="page-section"></main>
+<main id="page-agenda" class="page-section"></main>
+<main id="page-novo" class="page-section"></main>
+<main id="page-meus" class="page-section"></main>
+<main id="page-admin-login" class="page-section"></main>
+<main id="page-admin" class="page-section"></main>
+<main id="page-admin-clientes" class="page-section"></main>
+<main id="page-admin-agendamentos" class="page-section"></main>
+<main id="page-profissional" class="page-section"></main>
+
+<script>
+const API='https://trabalho-henrique.onrender.com/api';
+const ADMIN_API='/api/admin';
+function $(id){return document.getElementById(id)}
+function h(t,a,...c){
+  const e=document.createElement(t);
+  if(a)for(const k in a){
+    if(k==='on')for(const ev in a[k])e.addEventListener(ev,a[k][ev]);
+    else if(k==='style'&&typeof a[k]==='object')Object.assign(e.style,a[k]);
+    else if(k==='html')e.innerHTML=a[k];
+    else if(k==='cls')e.className=a[k];
+    else e.setAttribute(k,a[k])
+  }
+  for(const x of c.flat())if(x!=null&&x!==false){
+    if(typeof x==='string'||typeof x==='number')e.appendChild(document.createTextNode(x));
+    else if(x.nodeType)e.appendChild(x)
+  }
+  return e
+}
+async function req(p,o={}){
+  const t=localStorage.getItem('token');
+  const h={'Content-Type':'application/json',...o.headers};
+  if(t)h.Authorization='Bearer '+t;
+  const r=await fetch(API+p,{...o,headers:h});
+  if(!r.ok){const e=await r.json().catch(()=>({erro:'Erro'}));throw Error(e.erro||'Erro')}
+  return r.json()
+}
+const api={
+  getProfissionais:()=>req('/profissionais'),
+  getServicos:()=>req('/servicos'),
+  createCliente:d=>req('/clientes',{method:'POST',body:JSON.stringify(d)}),
+  getAgendamentos:p=>{const q=new URLSearchParams(p).toString();return req('/agendamentos'+(q?'?'+q:''))},
+  createAgendamento:d=>req('/agendamentos',{method:'POST',body:JSON.stringify(d)}),
+  updateAgendamentoStatus:(i,s)=>req('/agendamentos/'+i+'/status',{method:'PATCH',body:JSON.stringify({status:s})}),
+  login:(e,s)=>req('/auth/login',{method:'POST',body:JSON.stringify({email:e,senha:s})})
+};
+async function aReq(p,o={}){
+  const t=localStorage.getItem('adminToken');
+  if(!t)throw Error('No token');
+  const h={'Content-Type':'application/json',Authorization:'Bearer '+t,...o.headers};
+  const r=await fetch(ADMIN_API+p,{...o,headers:h});
+  if(r.status===401){localStorage.removeItem('adminToken');localStorage.removeItem('admin');ir('admin-login');throw Error('401')}
+  if(!r.ok){const e=await r.json().catch(()=>({erro:'Erro'}));throw Error(e.erro||'Erro')}
+  return r.json()
+}
+function getC(){const c=localStorage.getItem('cliente');return c?JSON.parse(c):null}
+function login(d){localStorage.setItem('token',d.token);localStorage.setItem('cliente',JSON.stringify(d.cliente));atualizarHeader()}
+function logout(){localStorage.removeItem('token');localStorage.removeItem('cliente');atualizarHeader();ir('home')}
+
+function mostrarModal(titulo,conteudo){
+  const overlay=h('div',{cls:'modal-overlay',on:{click:function(e){if(e.target===this)fechar()}}},
+    h('div',{cls:'modal-box'},
+      h('div',{cls:'modal-header'},h('h2',{},titulo),h('button',{cls:'modal-close',on:{click:fechar}},'\u2715')),
+      h('div',{cls:'modal-body'},conteudo)));
+  document.body.appendChild(overlay);
+  function fechar(){overlay.remove();document.body.style.overflow=''}
+  document.body.style.overflow='hidden'
+}
+
+const mock={
+  profissionais:[
+    {id:1,nome:'Carlos Silva',especialidade:'Barbeiro'},
+    {id:2,nome:'Ana Oliveira',especialidade:'Cabelereira'},
+    {id:3,nome:'Pedro Santos',especialidade:'Barbeiro'},
+    {id:4,nome:'Lucas Mendes',especialidade:'Barbeiro'},
+    {id:5,nome:'Julia Costa',especialidade:'Cabelereira'}],
+  servicos:[
+    {id:1,nome:'Corte Degrad\u00ea',preco:45,duracao:40},
+    {id:2,nome:'Barba Completa',preco:30,duracao:20},
+    {id:3,nome:'Corte + Barba',preco:65,duracao:60},
+    {id:4,nome:'Hidrata\u00e7\u00e3o',preco:50,duracao:45},
+    {id:5,nome:'Sobrancelha',preco:20,duracao:15},
+    {id:6,nome:'Pigmenta\u00e7\u00e3o Capilar',preco:80,duracao:90}],
+  clientes:[
+    {id:1,nome:'Henrique',email:'henrique@email.com',telefone:'(11) 99999-0001',total_agendamentos:5,created_at:'2025-11-10'},
+    {id:2,nome:'Maria Santos',email:'maria@email.com',telefone:'(11) 99999-0002',total_agendamentos:3,created_at:'2025-12-05'},
+    {id:3,nome:'Lucas Oliveira',email:'lucas@email.com',telefone:'(11) 99999-0003',total_agendamentos:8,created_at:'2025-10-20'},
+    {id:4,nome:'Ana Beatriz',email:'ana@email.com',telefone:'(11) 99999-0004',total_agendamentos:2,created_at:'2026-01-15'},
+    {id:5,nome:'Pedro Alves',email:'pedro@email.com',telefone:'(11) 99999-0005',total_agendamentos:6,created_at:'2025-09-01'},
+    {id:6,nome:'Carla Souza',email:'carla@email.com',telefone:'(11) 99999-0006',total_agendamentos:1,created_at:'2026-03-10'},
+    {id:7,nome:'Rafael Lima',email:'rafael@email.com',telefone:'(11) 99999-0007',total_agendamentos:4,created_at:'2025-08-22'}],
+  agendamentos:[]
+};
+
+const statusCfg={agendado:{label:'Agendado',color:'#F59E0B',bg:'#FFFBEB'},confirmado:{label:'Confirmado',color:'#6366F1',bg:'#EEF2FF'},cancelado:{label:'Cancelado',color:'#64748B',bg:'#F1F5F9'},concluido:{label:'Conclu\u00eddo',color:'#22C55E',bg:'#F0FDF4'}};
+
+function atualizarHeader(){
+  const c=getC();
+  const nav=$('auth-nav');nav.innerHTML='';
+  if(c){
+    nav.appendChild(h('div',{cls:'profile'},h('span',{cls:'avatar'},c.nome[0]),h('span',{cls:'nome'},c.nome)));
+    nav.appendChild(h('button',{style:{background:'var(--accent)',color:'#fff',border:'none',padding:'.4rem 1rem',borderRadius:'8px',cursor:'pointer',fontWeight:600,fontSize:'.85rem',fontFamily:'inherit',marginLeft:'.35rem'},on:{mouseenter:function(e){e.target.style.background='#E11D48'},mouseleave:function(e){e.target.style.background='var(--accent)'},click:logout}},'Sair'))
+  }else nav.appendChild(h('button',{cls:'ctaBtn',on:{click:()=>ir('login')}},'Entrar'));
+}
+
+const paginas={};
+
+function ir(nome){
+  if(window.location.hash==='#'+nome)return;
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  if(paginas[nome])paginas[nome]();
+  const sec=$('page-'+nome);
+  if(sec)sec.classList.add('active');
+  window.location.hash='#'+nome;
+  window.scrollTo(0,0);
+  atualizarHeader()
+}
+
+window.addEventListener('hashchange',()=>{
+  const p=window.location.hash.slice(1)||'home';
+  if(paginas[p])paginas[p]();
+  const sec=$('page-'+p);
+  if(sec){document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));sec.classList.add('active')}
+  atualizarHeader()
+});
+
+paginas.home=function(){
+  $('page-home').innerHTML='';
+  const c=getC();
+  const feats=[
+    {icon:'✦',title:'Agende em segundos',desc:'Escolha o profissional, o servi\u00e7o e o melhor hor\u00e1rio sem sair de casa.'},
+    {icon:'◈',title:'Profissionais',desc:'Veja a agenda de cada profissional e escolha quem voc\u00ea prefere.'},
+    {icon:'◉',title:'Tudo organizado',desc:'Acompanhe, cancele ou reagende seus hor\u00e1rios com um clique.'}
+  ];
+  const el=h('div',{cls:'page'},
+    h('section',{cls:'hero'},
+      h('div',{cls:'heroContent'},
+        h('span',{cls:'badge'},'Agenda inteligente'),
+        h('h1',{},"Seu tempo",h('br'),h('span',{cls:'highlight'},'bem agendado')),
+        h('p',{},'Marque hor\u00e1rios com profissionais de forma r\u00e1pida, f\u00e1cil e sem complica\u00e7\u00e3o.'),
+        h('div',{cls:'actions'},
+          h('button',{cls:'btnPrimary',on:{click:()=>ir('novo')}},'Agendar agora'),
+          h('button',{cls:'btnSecondary',on:{click:()=>ir('agenda')}},'Ver agenda'))),
+      h('div',{cls:'heroVisual'},
+        h('div',{cls:'cardDemo'},
+          h('div',{cls:'demoHeader'},h('span',{cls:'demoDot',style:{background:'#F43F5E'}}),h('span',{cls:'demoDot',style:{background:'#F59E0B'}}),h('span',{cls:'demoDot',style:{background:'#22C55E'}})),
+          h('div',{cls:'demoBody'},
+            h('div',{cls:'demoItem'},h('div',{cls:'demoTime'},'10:00'),h('div',{cls:'demoInfo'},h('strong',{},'Corte Degrad\u00ea'),h('span',{},'Carlos Silva'))),
+            h('div',{cls:'demoItem'},h('div',{cls:'demoTime'},'11:00'),h('div',{cls:'demoInfo'},h('strong',{},'Barba Completa'),h('span',{},'Ana Oliveira'))),
+            h('div',{cls:'demoItem'},h('div',{cls:'demoTime'},'14:30'),h('div',{cls:'demoInfo'},h('strong',{},'Corte + Barba'),h('span',{},'Pedro Santos'))))))),
+    h('section',{cls:'features'},feats.map(f=>
+      h('div',{cls:'card'},h('span',{cls:'cardIcon'},f.icon),h('h3',{},f.title),h('p',{},f.desc)))));
+  if(!c)el.appendChild(h('section',{cls:'cta'},
+    h('div',{cls:'ctaInner'},h('h2',{},'Vem pro Agend'),h('p',{},'Crie sua conta gr\u00e1tis e comece a agendar agora mesmo.'),h('button',{cls:'btnPrimary',on:{click:()=>ir('login')}},'Criar conta'))));
+  el.appendChild(h('footer',{cls:'footer'},h('p',{},'Agend \u2014 agendamento inteligente')));
+  $('page-home').appendChild(el)
+};
+
+paginas.login=function(){
+  const st={email:'',senha:'',nome:'',telefone:'',erro:'',sucesso:'',cadastro:false};
+  function render(){
+    $('page-login').innerHTML='';
+    const form=h('form',{cls:'form',on:{submit:async function(e){
+      e.preventDefault();st.erro='';st.sucesso='';
+      try{if(st.cadastro){await api.createCliente({nome:st.nome,email:st.email,telefone:st.telefone,senha:st.senha});const d=await api.login(st.email,st.senha);login(d);ir('novo');return}
+      if(st.email==='henrique@gmail.com'&&st.senha==='teste'){localStorage.setItem('token','henrique-token');localStorage.setItem('cliente',JSON.stringify({id:99,nome:'Henrique',email:'henrique@gmail.com'}));atualizarHeader();ir('profissional');return}
+      const d=await api.login(st.email,st.senha);login(d);ir('home')}catch(err){st.erro=err.message;render()}}}});
+    if(st.erro)form.appendChild(h('div',{cls:'erro'},st.erro));
+    if(st.sucesso)form.appendChild(h('div',{cls:'sucesso'},st.sucesso));
+    if(st.cadastro){
+      form.appendChild(h('div',{cls:'field'},h('label',{},'Nome'),h('input',{value:st.nome,on:{input:function(e){st.nome=e.target.value}},required:true,placeholder:'Seu nome'})));
+      form.appendChild(h('div',{cls:'field'},h('label',{},'Telefone'),h('input',{value:st.telefone,on:{input:function(e){st.telefone=e.target.value}},placeholder:'(11) 99999-8888'})));
+    }
+    form.appendChild(h('div',{cls:'field'},h('label',{},'Email'),h('input',{type:'email',value:st.email,on:{input:function(e){st.email=e.target.value}},required:true,placeholder:'seu@email.com'})));
+    form.appendChild(h('div',{cls:'field'},h('label',{},'Senha'),h('input',{type:'password',value:st.senha,on:{input:function(e){st.senha=e.target.value}},required:true,placeholder:'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'})));
+    form.appendChild(h('button',{type:'submit',cls:'btn'},st.cadastro?'Criar conta':'Entrar'));
+    const card=h('div',{cls:'page-center'},h('div',{cls:'authCard'},
+      h('div',{cls:'authHeader'},h('div',{cls:'authIcon'},'\u2726'),h('h2',{},st.cadastro?'Criar conta':'Bem-vindo de volta'),h('p',{},st.cadastro?'Preencha os dados para se cadastrar':'Entre na sua conta')),
+      form,
+      h('div',{cls:'toggle'},st.cadastro?'J\u00e1 tem conta? ':'N\u00e3o tem conta? ',h('button',{type:'button',on:{click:()=>{st.cadastro=!st.cadastro;st.erro='';st.sucesso='';render()}}},st.cadastro?'Fazer login':'Cadastre-se'))));
+    $('page-login').appendChild(card)
+  }
+  render()
+};
+
+paginas.agenda=function(){
+  let data=new Date().toISOString().split('T')[0],filtroStatus='';
+  function getLista(){
+    let lista=mock.agendamentos.filter(a=>a.data===data);
+    if(filtroStatus)lista=lista.filter(a=>a.status===filtroStatus);
+    return lista
+  }
+  const container=h('div',{cls:'agendaPage'},
+    h('div',{cls:'agendaTop'},
+      h('h1',{},'Agenda'),
+      h('div',{cls:'filtros'},
+        h('div',{cls:'filterGroup'},h('label',{},'Data'),h('input',{type:'date',value:data,on:{input:function(e){data=e.target.value;render()}}})),
+        h('div',{cls:'filterGroup'},h('label',{},'Status'),
+          h('select',{value:filtroStatus,on:{change:function(e){filtroStatus=e.target.value;render()}}},
+            h('option',{value:''},'Todos'),Object.entries(statusCfg).map(([k,{label}])=>h('option',{value:k},label)))))),
+    h('div',{cls:'lista',id:'ag-lista'}));
+  function render(){
+    const l=$('ag-lista');l.innerHTML='';
+    const lista=getLista();
+    if(!lista.length){l.appendChild(h('div',{cls:'vazio'},h('span',{cls:'vazioIcon'},'\u2726'),h('p',{},'Nenhum agendamento para esta data')));return}
+    const c=getC();
+    lista.forEach(a=>{
+      const cfg=statusCfg[a.status]||statusCfg.agendado;
+      const card=h('div',{cls:'agCard'},
+        h('div',{cls:'time'},a.hora.slice(0,5)),
+        h('div',{cls:'cardBody'},
+          h('div',{cls:'cardTop'},h('h3',{},a.cliente_nome),h('span',{cls:'statusTag',style:{background:cfg.bg,color:cfg.color}},cfg.label)),
+          h('div',{cls:'cardInfo'},h('span',{},'Profissional: '+a.profissional_nome),h('span',{},'Servi\u00e7o: '+a.servico_nome),h('span',{cls:'preco'},'R$ '+Number(a.preco).toFixed(2)))));
+      if(a.observacoes)card.querySelector('.cardBody').appendChild(h('p',{cls:'obs'},a.observacoes));
+      if(c){
+        const acts=h('div',{cls:'cardActions'});
+        if(a.status==='agendado')acts.appendChild(h('button',{cls:'btnCancelar',on:{click:function(){a.status='cancelado';render()}}},'Cancelar'));
+        if(a.status==='cancelado')acts.appendChild(h('button',{cls:'btnReativar',on:{click:function(){a.status='agendado';render()}}},'Reativar'));
+        if(a.status==='concluido')acts.appendChild(h('button',{cls:'btnReativar',on:{click:function(){a.status='agendado';render()}}},'Reabrir'));
+        card.querySelector('.cardBody').appendChild(acts)
+      }
+      l.appendChild(card)
+    })
+  }
+  $('page-agenda').appendChild(container);
+  render()
+};
+
+paginas.novo=function(){
+  const c=getC();
+  if(!c){ir('login');return}
+  let form={profissional_id:'',servico_id:'',data:'',hora:'',observacoes:''},erro='';
+  function render(){
+    $('page-novo').innerHTML='';
+    const formEl=h('form',{cls:'novoCard',on:{submit:function(e){
+      e.preventDefault();erro='';
+      if(!form.profissional_id||!form.servico_id||!form.data||!form.hora){erro='Preencha todos os campos obrigat\u00f3rios';render();return}
+      const prof=mock.profissionais.find(p=>p.id==form.profissional_id);
+      const serv=mock.servicos.find(s=>s.id==form.servico_id);
+      if(!prof||!serv){erro='Profissional ou servi\u00e7o inv\u00e1lido';render();return}
+      const novo={
+        id:Date.now(),cliente_nome:c.nome,cliente_email:c.email,cliente_id:c.id,
+        profissional_nome:prof.nome,profissional_id:prof.id,
+        servico_nome:serv.nome,servico_id:serv.id,
+        preco:serv.preco,data:form.data,hora:form.hora,
+        status:'agendado',duracao:serv.duracao,observacoes:form.observacoes
+      };
+      mock.agendamentos.unshift(novo);
+      ir('home')
+    }}});
+    formEl.appendChild(h('div',{cls:'novoHeader'},h('div',{cls:'novoIcon'},'\u2726'),h('h1',{},'Novo agendamento'),h('p',{},'Preencha os dados para marcar seu hor\u00e1rio')));
+    if(erro)formEl.appendChild(h('div',{cls:'erro'},erro));
+    const fields=h('div',{cls:'fields'});
+    fields.appendChild(h('div',{cls:'field'},h('label',{},'Profissional'),
+      h('select',{value:form.profissional_id,on:{change:function(e){form.profissional_id=e.target.value}},required:true},
+        h('option',{value:''},'Selecione...'),mock.profissionais.map(p=>h('option',{value:p.id},p.nome+' \u2014 '+p.especialidade)))));
+    fields.appendChild(h('div',{cls:'field'},h('label',{},'Servi\u00e7o'),
+      h('select',{value:form.servico_id,on:{change:function(e){form.servico_id=e.target.value}},required:true},
+        h('option',{value:''},'Selecione...'),mock.servicos.map(s=>h('option',{value:s.id},s.nome+' \u2014 R$ '+Number(s.preco).toFixed(2)+' ('+s.duracao+'min)')))));
+    const row=h('div',{cls:'row'});
+    row.appendChild(h('div',{cls:'field'},h('label',{},'Data'),h('input',{type:'date',value:form.data,on:{input:function(e){form.data=e.target.value}},required:true})));
+    row.appendChild(h('div',{cls:'field'},h('label',{},'Hor\u00e1rio'),h('input',{type:'time',value:form.hora,on:{input:function(e){form.hora=e.target.value}},required:true})));
+    fields.appendChild(row);
+    fields.appendChild(h('div',{cls:'field'},h('label',{},'Observa\u00e7\u00f5es ',h('span',{cls:'opcional'},'(opcional)')),h('textarea',{value:form.observacoes,on:{input:function(e){form.observacoes=e.target.value}},rows:3,placeholder:'Alguma observa\u00e7\u00e3o para o profissional?'})));
+    formEl.appendChild(fields);
+    formEl.appendChild(h('button',{type:'submit',cls:'btn'},'Confirmar agendamento'));
+    $('page-novo').appendChild(h('div',{cls:'novoPage'},formEl))
+  }
+  render()
+};
+
+paginas.meus=function(){
+  const c=getC();
+  if(!c){ir('login');return}
+  $('page-meus').appendChild(h('div',{cls:'meusPage'},h('h1',{},'Meus agendamentos'),h('div',{cls:'lista',id:'meus-lista'})));
+  function render(){
+    const l=$('meus-lista');l.innerHTML='';
+    const lista=mock.agendamentos.filter(a=>a.cliente_email===c.email);
+    if(!lista.length){l.appendChild(h('div',{cls:'vazio'},h('span',{cls:'vazioIcon'},'\u2726'),h('p',{},'Voc\u00ea ainda n\u00e3o tem agendamentos')));return}
+    lista.forEach(a=>{
+      const cfg=statusCfg[a.status]||statusCfg.agendado;
+      const card=h('div',{cls:'meusCard'},
+        h('div',{cls:'meusCardHeader'},
+          h('div',{cls:'servicoInfo'},h('h3',{},a.servico_nome),h('span',{cls:'tag',style:{background:cfg.bg,color:cfg.color}},cfg.label)),
+          h('div',{cls:'dataHora'},h('span',{cls:'data'},
+            new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR')),h('span',{cls:'hora'},a.hora.slice(0,5)))),
+        h('div',{cls:'meusCardBody'},
+          h('div',{cls:'infoRow'},h('span',{},'Profissional'),h('strong',{},a.profissional_nome)),
+          h('div',{cls:'infoRow'},h('span',{},'Valor'),h('strong',{},'R$ '+Number(a.preco).toFixed(2))),
+          h('div',{cls:'infoRow'},h('span',{},'Dura\u00e7\u00e3o'),h('strong',{},a.duracao+' min'))));
+      if(a.status==='agendado')card.appendChild(h('button',{cls:'btnCancelar',on:{click:function(){a.status='cancelado';render()}}},'Cancelar agendamento'));
+      l.appendChild(card)
+    })
+  }
+  render()
+};
+
+paginas['admin-login']=function(){
+  let usuario='',senha='',erro='';
+  function render(){
+    $('page-admin-login').innerHTML='';
+    const form=h('form',{cls:'authCard',on:{submit:function(e){
+      e.preventDefault();erro='';
+      if(usuario==='admin'&&senha==='admin'){
+        localStorage.setItem('adminToken','admin-token');
+        localStorage.setItem('admin',JSON.stringify({nome:'Admin'}));
+        ir('admin')
+      }else{erro='Usu\u00e1rio ou senha inv\u00e1lidos';render()}}}});
+    form.appendChild(h('div',{cls:'authHeader'},h('div',{cls:'authIcon'},'\u25C8'),h('h2',{},'Acesso Administrativo'),h('p',{},'Entre com suas credenciais de admin')));
+    if(erro)form.appendChild(h('div',{cls:'erro'},erro));
+    form.appendChild(h('div',{cls:'field'},h('label',{},'Usu\u00e1rio'),h('input',{type:'text',value:usuario,on:{input:function(e){usuario=e.target.value}},required:true,placeholder:'admin'})));
+    form.appendChild(h('div',{cls:'field'},h('label',{},'Senha'),h('input',{type:'password',value:senha,on:{input:function(e){senha=e.target.value}},required:true,placeholder:'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'})));
+    form.appendChild(h('button',{type:'submit',cls:'btn'},'Entrar no painel'));
+    $('page-admin-login').appendChild(h('div',{cls:'adminLoginPage'},form))
+  }
+  render()
+};
+
+paginas.admin=function(){
+  const token=localStorage.getItem('adminToken');
+  if(!token){ir('admin-login');return}
+  const hoje=mock.agendamentos.filter(a=>a.data===new Date().toISOString().split('T')[0]);
+  const pendentes=mock.agendamentos.filter(a=>a.status==='agendado');
+  const cards=[
+    {label:'Clientes',value:mock.clientes.length,cor:'#6366F1'},
+    {label:'Profissionais',value:mock.profissionais.length,cor:'#22C55E'},
+    {label:'Servi\u00e7os',value:mock.servicos.length,cor:'#F59E0B'},
+    {label:'Agendamentos Hoje',value:hoje.length,cor:'#F43F5E'},
+    {label:'Pendentes',value:pendentes.length,cor:'#8B5CF6'},
+    {label:'Total Agendamentos',value:mock.agendamentos.length,cor:'#06B6D4'}
+  ];
+  function tabelaAgendamentos(lista,l){
+    const t=h('div',{cls:'tabela'},
+      h('div',{cls:'tabelaHeader'},h('span',{},'Cliente'),h('span',{},'Profissional'),h('span',{},'Servi\u00e7o'),h('span',{},'Data'),h('span',{},'Hora'),h('span',{},'Status')));
+    (lista).forEach(a=>{
+      const s=statusCfg[a.status]||statusCfg.agendado;
+      t.appendChild(h('div',{cls:'tabelaRow'},
+        h('span',{},a.cliente_nome),h('span',{},a.profissional_nome),h('span',{},a.servico_nome),
+        h('span',{},new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR')+' '+a.hora?.slice(0,5)),
+        h('span',{cls:'statusTag',style:{background:s.bg,color:s.color}},s.label)))
+    });
+    return t
+  }
+  const page=h('div',{cls:'adminPage'},
+    h('div',{cls:'adminTop'},h('h1',{},'Painel Administrativo'),h('button',{cls:'sair',on:{click:function(){localStorage.removeItem('adminToken');localStorage.removeItem('admin');ir('admin-login')}}},'Sair')),
+    h('div',{cls:'adminCards'},cards.map(c=>
+      h('div',{cls:'adminCard',style:{borderTopColor:c.cor}},
+        h('span',{cls:'adminCardValue'},c.value),
+        h('span',{cls:'adminCardLabel'},c.label)))),
+    h('div',{cls:'adminSections'},
+      h('div',{cls:'adminSection'},
+        h('div',{cls:'adminSectionHeader'},h('h2',{},'\u00daltimos Agendamentos'),h('button',{cls:'btnExpandir',on:{click:()=>{
+          const l=h('div',{});
+          mock.agendamentos.forEach(a=>{
+            const s=statusCfg[a.status]||statusCfg.agendado;
+            l.appendChild(h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'.75rem 0',borderBottom:'1px solid var(--border)'}},
+              h('div',{style:{flex:1}},h('strong',{},a.cliente_nome),h('br'),h('span',{style:{fontSize:'.85rem',color:'var(--text-secondary)'}},a.profissional_nome+' \u2014 '+a.servico_nome)),
+              h('div',{style:{textAlign:'right'}},h('div',{style:{fontWeight:600}},'R$ '+a.preco.toFixed(2)),h('span',{style:{fontSize:'.85rem',color:'var(--text-secondary)'}},new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR')+' '+a.hora?.slice(0,5)),h('div',{cls:'statusTag',style:{background:s.bg,color:s.color,marginTop:'.25rem',width:'fit-content'}},s.label)))
+            )});
+          mostrarModal('\u00daltimos Agendamentos',l)
+        }}},'Ampliar'))),
+        h('div',{cls:'adminSectionBody'},tabelaAgendamentos(mock.agendamentos.slice(0,3)))),
+      h('div',{cls:'adminSection'},
+        h('div',{cls:'adminSectionHeader'},h('h2',{},'Clientes Cadastrados'),h('button',{cls:'btnExpandir',on:{click:()=>{
+          const l=h('div',{});
+          mock.clientes.forEach(c=>{
+            l.appendChild(h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'.75rem 0',borderBottom:'1px solid var(--border)'}},
+              h('div',{},h('strong',{},c.nome),h('br'),h('span',{style:{fontSize:'.85rem',color:'var(--text-secondary)'}},c.email)),
+              h('div',{style:{textAlign:'right'}},h('div',{style:{fontWeight:600,fontSize:'.9rem'}},c.telefone),h('span',{style:{fontSize:'.8rem',color:'var(--text-secondary)'}},c.total_agendamentos+' agendamentos'))))
+          });
+          mostrarModal('Clientes Cadastrados',l)
+        }}},'Ampliar'))),
+        h('div',{cls:'adminSectionBody'},
+          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:'.75rem'}},
+            mock.clientes.slice(0,4).map(c=>h('div',{style:{background:'var(--bg)',padding:'.75rem',borderRadius:8}},h('strong',{style:{fontSize:'.9rem'}},c.nome),h('div',{style:{fontSize:'.8rem',color:'var(--text-secondary)'}},c.email))))),
+      h('div',{cls:'adminSection'},
+        h('div',{cls:'adminSectionHeader'},h('h2',{},'Servi\u00e7os'),h('button',{cls:'btnExpandir',on:{click:()=>{
+          const l=h('div',{});
+          mock.servicos.forEach(s=>{
+            l.appendChild(h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'.75rem 0',borderBottom:'1px solid var(--border)'}},
+              h('div',{},h('strong',{},s.nome),h('br'),h('span',{style:{fontSize:'.85rem',color:'var(--text-secondary)'}},s.duracao+' min')),
+              h('div',{style:{fontWeight:700,color:'var(--primary)'}},'R$ '+s.preco.toFixed(2))))
+          });
+          mostrarModal('Servi\u00e7os Dispon\u00edveis',l)
+        }}},'Ampliar'))),
+        h('div',{cls:'adminSectionBody'},
+          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:'.75rem'}},
+            mock.servicos.slice(0,3).map(s=>h('div',{style:{background:'var(--primary-light)',padding:'.75rem',borderRadius:8}},h('div',{style:{fontSize:'.9rem',fontWeight:600}},s.nome),h('div',{style:{fontSize:'.85rem',color:'var(--primary)'}},'R$ '+s.preco.toFixed(2)))))),
+      h('div',{cls:'adminSection'},
+        h('div',{cls:'adminSectionHeader'},h('h2',{},'Profissionais'),h('button',{cls:'btnExpandir',on:{click:()=>{
+          const l=h('div',{});
+          mock.profissionais.forEach(p=>{
+            const ag=mock.agendamentos.filter(a=>a.profissional_nome===p.nome);
+            l.appendChild(h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'.75rem 0',borderBottom:'1px solid var(--border)'}},
+              h('div',{},h('strong',{},p.nome),h('br'),h('span',{style:{fontSize:'.85rem',color:'var(--text-secondary)'}},p.especialidade)),
+              h('div',{style:{textAlign:'right'}},h('div',{style:{fontWeight:600,fontSize:'.9rem'}},ag.length+' agendamentos'),h('span',{style:{fontSize:'.8rem',color:'var(--text-secondary)'}},'hoje: '+ag.filter(a=>a.data===new Date().toISOString().split('T')[0]).length))))
+          });
+          mostrarModal('Profissionais',l)
+        }}},'Ampliar'))),
+        h('div',{cls:'adminSectionBody'},
+          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:'.75rem'}},
+            mock.profissionais.slice(0,3).map(p=>h('div',{style:{background:'var(--bg)',padding:'.75rem',borderRadius:8}},h('strong',{style:{fontSize:'.9rem'}},p.nome),h('div',{style:{fontSize:'.8rem',color:'var(--text-secondary)'}},p.especialidade))))));
+  $('page-admin').innerHTML='';
+  $('page-admin').appendChild(page)
+};
+
+paginas['admin-clientes']=function(){
+  const token=localStorage.getItem('adminToken');
+  if(!token){ir('admin-login');return}
+  const page=h('div',{cls:'adminPage'},
+    h('div',{cls:'adminTop'},h('h1',{},'Clientes Cadastrados'),h('button',{cls:'sair',style:{background:'#EEF2FF',color:'#6366F1'},on:{click:()=>ir('admin')}},'\u2190 Voltar')),
+    h('div',{cls:'tabela'},
+      h('div',{cls:'tabelaHeader'},h('span',{},'Nome'),h('span',{},'Email'),h('span',{},'Telefone'),h('span',{},'Agendamentos'),h('span',{},'Cadastro')),
+      mock.clientes.map(c=>h('div',{cls:'tabelaRow'},
+        h('span',{},h('strong',{},c.nome)),h('span',{},c.email),h('span',{},c.telefone||'-'),h('span',{},c.total_agendamentos),
+        h('span',{},new Date(c.created_at+'T12:00:00').toLocaleDateString('pt-BR'))))));
+  $('page-admin-clientes').innerHTML='';
+  $('page-admin-clientes').appendChild(page)
+};
+
+paginas['admin-agendamentos']=function(){
+  const token=localStorage.getItem('adminToken');
+  if(!token){ir('admin-login');return}
+  let filtro='';
+  const stLabels={agendado:'Agendado',confirmado:'Confirmado',cancelado:'Cancelado',concluido:'Conclu\u00eddo'};
+  function getLista(){return filtro?mock.agendamentos.filter(a=>a.status===filtro):mock.agendamentos}
+  function renderTabela(){
+    const tbl=$('admin-ag-tabela');tbl.innerHTML='';
+    tbl.appendChild(h('div',{cls:'tabelaHeader'},h('span',{},'Cliente'),h('span',{},'Profissional'),h('span',{},'Servi\u00e7o'),h('span',{},'Data/Hora'),h('span',{},'Status'),h('span',{},'A\u00e7\u00f5es')));
+    getLista().forEach(a=>{
+      const row=h('div',{cls:'tabelaRow'},
+        h('span',{},h('strong',{},a.cliente_nome),h('br'),h('small',{},a.cliente_email)),
+        h('span',{},a.profissional_nome),
+        h('span',{},a.servico_nome,h('br'),h('small',{},'R$ '+Number(a.preco).toFixed(2))),
+        h('span',{},new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR')+' '+a.hora?.slice(0,5)),
+        h('span',{cls:'statusTag st-'+a.status},stLabels[a.status]),
+        h('span',{style:{display:'flex',gap:'.35rem',flexWrap:'wrap'}}));
+      const acts=row.querySelector('span:last-child');
+      if(a.status==='agendado'){
+        acts.appendChild(h('button',{cls:'btnAcao',style:{background:'#EEF2FF',color:'#6366F1'},on:{click:function(){a.status='confirmado';renderTabela()}}},'Confirmar'));
+        acts.appendChild(h('button',{cls:'btnAcao',style:{background:'#FFF1F2',color:'#F43F5E'},on:{click:function(){a.status='cancelado';renderTabela()}}},'Cancelar'));
+      }
+      if(a.status==='confirmado')acts.appendChild(h('button',{cls:'btnAcao',style:{background:'#F0FDF4',color:'#22C55E'},on:{click:function(){a.status='concluido';renderTabela()}}},'Concluir'));
+      tbl.appendChild(row)
+    })
+  }
+  const page=h('div',{cls:'adminPage'},
+    h('div',{cls:'adminTop'},h('h1',{},'Agendamentos'),h('div',{cls:'adminHeaderBtns'},
+      h('select',{value:filtro,on:{change:function(e){filtro=e.target.value;renderTabela()}},style:{padding:'.5rem',borderRadius:8,border:'1px solid var(--border)',fontFamily:'inherit'}},
+        h('option',{value:''},'Todos'),Object.entries(stLabels).map(([k,v])=>h('option',{value:k},v))),
+      h('button',{cls:'sair',style:{background:'#EEF2FF',color:'#6366F1'},on:{click:()=>ir('admin')}},'\u2190 Voltar'))),
+    h('div',{cls:'tabela',id:'admin-ag-tabela'},
+      h('div',{cls:'tabelaHeader'},h('span',{},'Cliente'),h('span',{},'Profissional'),h('span',{},'Servi\u00e7o'),h('span',{},'Data/Hora'),h('span',{},'Status'),h('span',{},'A\u00e7\u00f5es'))));
+  $('page-admin-agendamentos').appendChild(page);
+  renderTabela()
+};
+
+paginas['profissional']=function(){
+  const c=getC();
+  if(!c||c.id!==99){ir('login');return}
+
+  function render(){
+    $('page-profissional').innerHTML='';
+    const page=h('div',{cls:'adminPage'},
+      h('div',{cls:'adminTop'},h('h1',{},'Ol\u00e1, '+c.nome)),
+      h('div',{cls:'adminCards'},
+        h('div',{cls:'adminCard',style:{borderTopColor:'#6366F1'}},h('span',{cls:'adminCardValue'},mock.agendamentos.length),h('span',{cls:'adminCardLabel'},'Agendamentos')),
+        h('div',{cls:'adminCard',style:{borderTopColor:'#22C55E'}},h('span',{cls:'adminCardValue'},mock.profissionais.length),h('span',{cls:'adminCardLabel'},'Profissionais')),
+        h('div',{cls:'adminCard',style:{borderTopColor:'#F59E0B'}},h('span',{cls:'adminCardValue'},mock.servicos.length),h('span',{cls:'adminCardLabel'},'Servi\u00e7os'))),
+      h('div',{cls:'adminSections'},
+        h('div',{cls:'adminSection'},
+          h('div',{cls:'adminSectionHeader'},h('h2',{},'Criar Agendamento')),
+          h('div',{cls:'adminSectionBody'},criarForm())),
+        h('div',{cls:'adminSection'},
+          h('div',{cls:'adminSectionHeader'},h('h2',{},'Agendamentos')),
+          h('div',{cls:'adminSectionBody',id:'prof-lista'})),
+        h('div',{cls:'adminSection'},
+          h('div',{cls:'adminSectionHeader'},h('h2',{},'Profissionais')),
+          h('div',{cls:'adminSectionBody'},h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:'.75rem'}},
+            mock.profissionais.map(p=>h('div',{style:{background:'var(--bg)',padding:'.75rem',borderRadius:8}},h('strong',{style:{fontSize:'.9rem'}},p.nome),h('div',{style:{fontSize:'.8rem',color:'var(--text-secondary)'}},p.especialidade)))))),
+        h('div',{cls:'adminSection'},
+          h('div',{cls:'adminSectionHeader'},h('h2',{},'Servi\u00e7os')),
+          h('div',{cls:'adminSectionBody'},h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:'.75rem'}},
+            mock.servicos.map(s=>h('div',{style:{background:'var(--primary-light)',padding:'.75rem',borderRadius:8}},h('div',{style:{fontSize:'.9rem',fontWeight:600}},s.nome),h('div',{style:{fontSize:'.85rem',color:'var(--primary)'}},'R$ '+s.preco.toFixed(2),' | ',s.duracao+'min'))))))));
+    $('page-profissional').appendChild(page);
+    renderLista()
+  }
+
+  function criarForm(){
+    const f={profissional_id:'',servico_id:'',data:'',hora:'',observacoes:'',erro:''};
+    const el=h('form',{cls:'fields',on:{submit:function(e){
+      e.preventDefault();f.erro='';
+      if(!f.profissional_id||!f.servico_id||!f.data||!f.hora){f.erro='Preencha todos os campos obrigat\u00f3rios';montarForm();return}
+      const prof=mock.profissionais.find(p=>p.id==f.profissional_id);
+      const serv=mock.servicos.find(s=>s.id==f.servico_id);
+      if(!prof||!serv){f.erro='Profissional ou servi\u00e7o inv\u00e1lido';montarForm();return}
+      const novo={
+        id:Date.now(),cliente_nome:c.nome,cliente_email:c.email,
+        profissional_nome:prof.nome,servico_nome:serv.nome,
+        preco:serv.preco,data:f.data,hora:f.hora,
+        status:'agendado',duracao:serv.duracao,observacoes:f.observacoes
+      };
+      mock.agendamentos.unshift(novo);
+      render()
+    }}});
+    function montarForm(){
+      el.innerHTML='';
+      if(f.erro)el.appendChild(h('div',{cls:'erro'},f.erro));
+      el.appendChild(h('div',{cls:'row'},
+        h('div',{cls:'field'},h('label',{},'Profissional'),
+          h('select',{value:f.profissional_id,on:{change:function(e){f.profissional_id=e.target.value}},required:true},
+            h('option',{value:''},'Selecione...'),mock.profissionais.map(p=>h('option',{value:p.id},p.nome)))),
+        h('div',{cls:'field'},h('label',{},'Servi\u00e7o'),
+          h('select',{value:f.servico_id,on:{change:function(e){f.servico_id=e.target.value}},required:true},
+            h('option',{value:''},'Selecione...'),mock.servicos.map(s=>h('option',{value:s.id},s.nome+' \u2014 R$ '+s.preco.toFixed(2)))))));
+      el.appendChild(h('div',{cls:'row'},
+        h('div',{cls:'field'},h('label',{},'Data'),h('input',{type:'date',value:f.data,on:{input:function(e){f.data=e.target.value}},required:true})),
+        h('div',{cls:'field'},h('label',{},'Hor\u00e1rio'),h('input',{type:'time',value:f.hora,on:{input:function(e){f.hora=e.target.value}},required:true}))));
+      el.appendChild(h('div',{cls:'field'},h('label',{},'Observa\u00e7\u00f5es'),h('textarea',{value:f.observacoes,on:{input:function(e){f.observacoes=e.target.value}},rows:2,placeholder:'Opcional'})));
+      el.appendChild(h('button',{type:'submit',cls:'btn',style:{marginTop:'.5rem'}},'Criar agendamento'))
+    }
+    montarForm();
+    return el
+  }
+
+  function renderLista(){
+    const l=$('prof-lista');l.innerHTML='';
+    if(!mock.agendamentos.length){l.appendChild(h('div',{style:{textAlign:'center',padding:'2rem',color:'var(--text-secondary)'}},h('span',{style:{fontSize:'2rem',display:'block',marginBottom:'.5rem',color:'var(--border)'}},'\u2726'),h('p',{},'Nenhum agendamento criado')));return}
+    mock.agendamentos.forEach(a=>{
+      const s=statusCfg[a.status]||statusCfg.agendado;
+      const card=h('div',{cls:'agCard',style:{marginBottom:'.5rem'}},
+        h('div',{cls:'time'},a.hora?.slice(0,5)),
+        h('div',{cls:'cardBody'},
+          h('div',{cls:'cardTop'},h('h3',{},a.servico_nome),h('span',{cls:'statusTag',style:{background:s.bg,color:s.color}},s.label)),
+          h('div',{cls:'cardInfo'},h('span',{},'Profissional: '+a.profissional_nome),h('span',{cls:'preco'},'R$ '+Number(a.preco).toFixed(2)),h('span',{style:{fontSize:'.85rem',color:'var(--text-secondary)'}},new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR'))),
+          a.status==='agendado'?h('div',{cls:'cardActions'},h('button',{cls:'btnCancelar',on:{click:function(){a.status='cancelado';renderLista()}}},'Cancelar')):null));
+      l.appendChild(card)
+    })
+  }
+  render()
+};
+
+atualizarHeader();
+const hsh=window.location.hash.slice(1)||'home';
+if(paginas[hsh])paginas[hsh]();
+const sc=$('page-'+hsh);
+if(sc){document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));sc.classList.add('active')}
+</script>
+</body>
+</html>
